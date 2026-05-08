@@ -13,28 +13,34 @@ interface IBastionFirewall {
     function validateUserOp(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
-    ) external returns (uint256 validationData);
+    ) external returns (uint validationData);
 
     /// @notice Check whether this validator is valid for a given account.
     /// @param account The smart account address.
     /// @return magicValue ERC-1271 magic value if valid.
-    function isValidForAccount(address account) external view returns (bytes4 magicValue);
+    function isValidForAccount(
+        address account
+    ) external view returns (bytes4 magicValue);
 
     /// @notice Called when this validator is installed on an account.
     /// @param data Optional installation data.
-    function onInstall(bytes calldata data) external;
+    function onInstall(
+        bytes calldata data
+    ) external;
 
     /// @notice Called when this validator is uninstalled from an account.
     /// @param data Optional uninstallation data.
-    function onUninstall(bytes calldata data) external;
+    function onUninstall(
+        bytes calldata data
+    ) external;
 
     /// @notice Emitted when an agent transaction is allowed through the firewall.
     event TransactionAllowed(
         address indexed agent,
         address indexed target,
         bytes4 indexed selector,
-        uint256 value,
-        uint256 timestamp
+        uint value,
+        uint timestamp
     );
 
     /// @notice Emitted when an agent transaction is blocked by the firewall.
@@ -42,36 +48,32 @@ interface IBastionFirewall {
         address indexed agent,
         address indexed target,
         bytes4 indexed selector,
-        uint256 value,
-        uint256 timestamp,
+        uint value,
+        uint timestamp,
         bytes reason
     );
 
     /// @notice Emitted when a firewall policy is updated.
     event PolicyUpdated(
-        address indexed agent,
-        address indexed target,
-        bytes4 selector,
-        bool allowed,
-        uint256 timestamp
+        address indexed agent, address indexed target, bytes4 selector, bool allowed, uint timestamp
     );
 
     error NotAuthorized(address agent, address target, bytes4 selector);
     error PolicyNotSet(address agent);
-    error ValueExceedsLimit(uint256 value, uint256 limit);
-    error GasExceedsLimit(uint256 gas, uint256 limit);
-    error RateLimitExceeded(address agent, uint256 windowStart);
+    error ValueExceedsLimit(uint value, uint limit);
+    error GasExceedsLimit(uint gas, uint limit);
+    error RateLimitExceeded(address agent, uint windowStart);
     error InvalidValidatorData();
 }
 
 /// @notice Packed user operation struct per ERC-4337 v0.7.
 struct PackedUserOperation {
     address sender;
-    uint256 nonce;
+    uint nonce;
     bytes initCode;
     bytes callData;
     bytes32 accountGasLimits;
-    uint256 preVerificationGas;
+    uint preVerificationGas;
     bytes32 gasFees;
     bytes paymasterAndData;
     bytes signature;

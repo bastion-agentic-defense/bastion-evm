@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {IBastionFirewall, PackedUserOperation} from "./interfaces/IBastionFirewall.sol";
-import {IBastionPolicy} from "./interfaces/IBastionPolicy.sol";
-import {IBastionAudit} from "./interfaces/IBastionAudit.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { IBastionFirewall, PackedUserOperation } from "./interfaces/IBastionFirewall.sol";
+import { IBastionPolicy } from "./interfaces/IBastionPolicy.sol";
+import { IBastionAudit } from "./interfaces/IBastionAudit.sol";
 
 /// @title BastionFirewall
 /// @notice ERC-7579 compatible validator that enforces agent transaction policies.
@@ -51,25 +51,20 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
     function validateUserOp(
         PackedUserOperation calldata userOp,
         bytes32 /* userOpHash */
-    ) external override whenNotPaused returns (uint256 validationData) {
+    ) external override whenNotPaused returns (uint validationData) {
         address agent = userOp.sender;
 
         if (_installedAccounts[agent] == bytes32(0)) {
             revert NotAuthorized(agent, address(0), bytes4(0));
         }
 
-        (address target, uint256 value, bytes4 selector, ) =
-            _decodeCallData(userOp.callData);
+        (address target, uint value, bytes4 selector,) = _decodeCallData(userOp.callData);
 
         // Run firewall checks
-        (bool allowed, bytes memory reason) = policyEngine.checkTransaction(
-            agent,
-            target,
-            value,
-            userOp.callData
-        );
+        (bool allowed, bytes memory reason) =
+            policyEngine.checkTransaction(agent, target, value, userOp.callData);
 
-        uint256 gasBefore = gasleft();
+        uint gasBefore = gasleft();
 
         if (!allowed) {
             auditLog.record(
@@ -87,14 +82,7 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
         }
 
         auditLog.record(
-            agent,
-            target,
-            selector,
-            value,
-            gasBefore - gasleft(),
-            true,
-            "",
-            userOp.signature
+            agent, target, selector, value, gasBefore - gasleft(), true, "", userOp.signature
         );
 
         emit TransactionAllowed(agent, target, selector, value, block.timestamp);
@@ -104,12 +92,16 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
     }
 
     /// @inheritdoc IBastionFirewall
-    function isValidForAccount(address account) external view override returns (bytes4) {
+    function isValidForAccount(
+        address account
+    ) external view override returns (bytes4) {
         return _installedAccounts[account] != bytes32(0) ? VALIDATOR_VALID : bytes4(0);
     }
 
     /// @inheritdoc IBastionFirewall
-    function onInstall(bytes calldata /* data */) external override {
+    function onInstall(
+        bytes calldata /* data */
+    ) external override {
         address account = msg.sender;
         bytes32 hash = keccak256(abi.encode(_VALIDATOR_TYPEHASH, account, block.chainid));
         _installedAccounts[account] = hash;
@@ -117,7 +109,9 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
     }
 
     /// @inheritdoc IBastionFirewall
-    function onUninstall(bytes calldata) external override {
+    function onUninstall(
+        bytes calldata
+    ) external override {
         address account = msg.sender;
         delete _installedAccounts[account];
     }
@@ -137,7 +131,9 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
     }
 
     /// @notice Check if an account has the Bastion validator installed.
-    function isInstalled(address account) external view returns (bool) {
+    function isInstalled(
+        address account
+    ) external view returns (bool) {
         return _installedAccounts[account] != bytes32(0);
     }
 
@@ -147,7 +143,7 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
 
     function _decodeCallData(
         bytes calldata callData
-    ) internal pure returns (address target, uint256 value, bytes4 selector, bytes memory params) {
+    ) internal pure returns (address target, uint value, bytes4 selector, bytes memory params) {
         require(callData.length >= 4, "callData too short");
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -155,7 +151,7 @@ contract BastionFirewall is IBastionFirewall, Ownable, Pausable, ReentrancyGuard
             value := calldataload(add(callData.offset, 32))
             selector := calldataload(add(callData.offset, 68))
         }
-        uint256 paramsLen = callData.length - 68;
+        uint paramsLen = callData.length - 68;
         params = callData[68:68 + paramsLen];
     }
 }

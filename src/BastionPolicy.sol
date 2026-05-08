@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IBastionPolicy} from "./interfaces/IBastionPolicy.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IBastionPolicy } from "./interfaces/IBastionPolicy.sol";
 
 /// @title BastionPolicy
 /// @notice Policy engine storing per-agent transaction rules.
@@ -10,21 +10,24 @@ import {IBastionPolicy} from "./interfaces/IBastionPolicy.sol";
 /// daily transaction quotas, and cooldown windows.
 contract BastionPolicy is IBastionPolicy, Ownable {
     /// @notice Per-agent allowlist: agent => target => selector => allowed.
-    mapping(address agent => mapping(address target => mapping(bytes4 selector => bool))) private _allowlist;
+    mapping(address agent => mapping(address target => mapping(bytes4 selector => bool))) private
+        _allowlist;
 
     /// @notice Per-agent policy configuration.
     mapping(address agent => Policy) private _policies;
 
     /// @notice Per-agent transaction counter for rate limiting.
-    mapping(address agent => uint256 count) private _txCount;
-    mapping(address agent => uint256 windowStart) private _txWindow;
+    mapping(address agent => uint count) private _txCount;
+    mapping(address agent => uint windowStart) private _txWindow;
 
     /// @notice Per-agent last transaction timestamp for cooldown.
-    mapping(address agent => uint256 timestamp) private _lastTx;
+    mapping(address agent => uint timestamp) private _lastTx;
 
-    uint256 private constant _WINDOW_DURATION = 1 days;
+    uint private constant _WINDOW_DURATION = 1 days;
 
-    constructor(address _owner) Ownable(_owner) {}
+    constructor(
+        address _owner
+    ) Ownable(_owner) { }
 
     // ──────────────────────────────────────────────────────────────
     // Policy Management
@@ -39,8 +42,8 @@ contract BastionPolicy is IBastionPolicy, Ownable {
 
         // Clear existing allowlist
         Policy storage old = _policies[agent];
-        for (uint256 i = 0; i < old.allowedTargets.length; i++) {
-            for (uint256 j = 0; j < old.allowedSelectors.length; j++) {
+        for (uint i = 0; i < old.allowedTargets.length; i++) {
+            for (uint j = 0; j < old.allowedSelectors.length; j++) {
                 _allowlist[agent][old.allowedTargets[i]][old.allowedSelectors[j]] = false;
             }
         }
@@ -48,8 +51,8 @@ contract BastionPolicy is IBastionPolicy, Ownable {
         _policies[agent] = policy;
 
         // Rebuild allowlist
-        for (uint256 i = 0; i < policy.allowedTargets.length; i++) {
-            for (uint256 j = 0; j < policy.allowedSelectors.length; j++) {
+        for (uint i = 0; i < policy.allowedTargets.length; i++) {
+            for (uint j = 0; j < policy.allowedSelectors.length; j++) {
                 _allowlist[agent][policy.allowedTargets[i]][policy.allowedSelectors[j]] = true;
             }
         }
@@ -60,10 +63,12 @@ contract BastionPolicy is IBastionPolicy, Ownable {
     }
 
     /// @inheritdoc IBastionPolicy
-    function removePolicy(address agent) external override onlyOwner {
+    function removePolicy(
+        address agent
+    ) external override onlyOwner {
         Policy storage p = _policies[agent];
-        for (uint256 i = 0; i < p.allowedTargets.length; i++) {
-            for (uint256 j = 0; j < p.allowedSelectors.length; j++) {
+        for (uint i = 0; i < p.allowedTargets.length; i++) {
+            for (uint j = 0; j < p.allowedSelectors.length; j++) {
                 _allowlist[agent][p.allowedTargets[i]][p.allowedSelectors[j]] = false;
             }
         }
@@ -81,7 +86,7 @@ contract BastionPolicy is IBastionPolicy, Ownable {
     function checkTransaction(
         address agent,
         address target,
-        uint256 value,
+        uint value,
         bytes calldata callData
     ) external view override returns (bool allowed, bytes memory reason) {
         Policy storage policy = _policies[agent];
@@ -130,13 +135,17 @@ contract BastionPolicy is IBastionPolicy, Ownable {
     // ──────────────────────────────────────────────────────────────
 
     /// @inheritdoc IBastionPolicy
-    function getPolicy(address agent) external view override returns (Policy memory) {
+    function getPolicy(
+        address agent
+    ) external view override returns (Policy memory) {
         if (_policies[agent].agent == address(0)) revert AgentNotRegistered(agent);
         return _policies[agent];
     }
 
     /// @inheritdoc IBastionPolicy
-    function getTxCount(address agent) external view override returns (uint256) {
+    function getTxCount(
+        address agent
+    ) external view override returns (uint) {
         if (block.timestamp >= _txWindow[agent] + _WINDOW_DURATION) {
             return 0;
         }

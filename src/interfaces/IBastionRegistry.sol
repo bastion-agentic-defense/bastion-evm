@@ -11,7 +11,7 @@ interface IBastionRegistry {
         string metadataURI;
         address owner;
         bool isActive;
-        uint256 registeredAt;
+        uint registeredAt;
     }
 
     struct TargetInfo {
@@ -19,7 +19,7 @@ interface IBastionRegistry {
         string name;
         bool isVerified;
         address verifier;
-        uint256 registeredAt;
+        uint registeredAt;
     }
 
     /// @notice Register an AI agent in the Bastion ecosystem.
@@ -35,40 +35,39 @@ interface IBastionRegistry {
     ) external returns (bytes32 targetId);
 
     /// @notice Verify a target contract (admin-only operation).
-    function verifyTarget(address target) external;
+    function verifyTarget(
+        address target
+    ) external;
 
     /// @notice Check if an agent is registered and active.
-    function isAgentActive(address agent) external view returns (bool);
+    function isAgentActive(
+        address agent
+    ) external view returns (bool);
 
     /// @notice Check if a target is verified.
-    function isTargetVerified(address target) external view returns (bool);
+    function isTargetVerified(
+        address target
+    ) external view returns (bool);
 
     /// @notice Get agent information.
-    function getAgent(address agent) external view returns (AgentInfo memory);
+    function getAgent(
+        address agent
+    ) external view returns (AgentInfo memory);
 
     /// @notice Get target information.
-    function getTarget(address target) external view returns (TargetInfo memory);
+    function getTarget(
+        address target
+    ) external view returns (TargetInfo memory);
 
     event AgentRegistered(
-        bytes32 indexed agentId,
-        address indexed agent,
-        string name,
-        address owner,
-        uint256 timestamp
+        bytes32 indexed agentId, address indexed agent, string name, address owner, uint timestamp
     );
 
     event TargetRegistered(
-        bytes32 indexed targetId,
-        address indexed target,
-        string name,
-        uint256 timestamp
+        bytes32 indexed targetId, address indexed target, string name, uint timestamp
     );
 
-    event TargetVerified(
-        address indexed target,
-        address indexed verifier,
-        uint256 timestamp
-    );
+    event TargetVerified(address indexed target, address indexed verifier, uint timestamp);
 
     error AgentAlreadyRegistered(address agent);
     error AgentNotRegistered(address agent);

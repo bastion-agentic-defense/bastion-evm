@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {IBastionAudit} from "./interfaces/IBastionAudit.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { IBastionAudit } from "./interfaces/IBastionAudit.sol";
 
 /// @title BastionAudit
 /// @notice Immutable on-chain audit trail for all agent transactions.
@@ -10,15 +10,14 @@ import {IBastionAudit} from "./interfaces/IBastionAudit.sol";
 /// Uses EIP-712 typed structured data for verifiable audit entries.
 /// Entries are append-only and never deleted.
 contract BastionAudit is IBastionAudit, EIP712 {
-    bytes32 public constant AUDIT_ENTRY_TYPEHASH =
-        keccak256(
-            "AuditEntry(bytes32 id,address agent,address target,bytes4 selector,uint256 value,uint256 gasUsed,bool allowed,bytes reason,uint256 timestamp,uint256 blockNumber)"
-        );
+    bytes32 public constant AUDIT_ENTRY_TYPEHASH = keccak256(
+        "AuditEntry(bytes32 id,address agent,address target,bytes4 selector,uint256 value,uint256 gasUsed,bool allowed,bytes reason,uint256 timestamp,uint256 blockNumber)"
+    );
 
-    uint256 private _entryCount;
+    uint private _entryCount;
     mapping(bytes32 entryId => AuditEntry) private _entries;
     mapping(address agent => bytes32[] entryIds) private _agentEntries;
-    mapping(bytes32 entryId => uint256 index) private _agentEntryIndex;
+    mapping(bytes32 entryId => uint index) private _agentEntryIndex;
 
     bytes32 private immutable _DOMAIN_SEPARATOR;
 
@@ -35,24 +34,16 @@ contract BastionAudit is IBastionAudit, EIP712 {
         address agent,
         address target,
         bytes4 selector,
-        uint256 value,
-        uint256 gasUsed,
+        uint value,
+        uint gasUsed,
         bool allowed,
         bytes calldata reason,
         bytes calldata signature
     ) external override returns (bytes32 entryId) {
-        uint256 _count = _entryCount;
+        uint _count = _entryCount;
         bytes32 _id = keccak256(
             abi.encodePacked(
-                agent,
-                target,
-                selector,
-                value,
-                gasUsed,
-                allowed,
-                reason,
-                block.timestamp,
-                _count
+                agent, target, selector, value, gasUsed, allowed, reason, block.timestamp, _count
             )
         );
 
@@ -85,19 +76,21 @@ contract BastionAudit is IBastionAudit, EIP712 {
     // ──────────────────────────────────────────────────────────────
 
     /// @inheritdoc IBastionAudit
-    function getEntry(bytes32 entryId) external view override returns (AuditEntry memory) {
+    function getEntry(
+        bytes32 entryId
+    ) external view override returns (AuditEntry memory) {
         return _entries[entryId];
     }
 
     /// @inheritdoc IBastionAudit
     function getEntriesByAgent(
         address agent,
-        uint256 fromTimestamp,
-        uint256 toTimestamp
+        uint fromTimestamp,
+        uint toTimestamp
     ) external view override returns (AuditEntry[] memory) {
         bytes32[] storage ids = _agentEntries[agent];
-        uint256 count;
-        for (uint256 i = 0; i < ids.length; i++) {
+        uint count;
+        for (uint i = 0; i < ids.length; i++) {
             AuditEntry storage e = _entries[ids[i]];
             if (e.timestamp >= fromTimestamp && e.timestamp <= toTimestamp) {
                 count++;
@@ -105,8 +98,8 @@ contract BastionAudit is IBastionAudit, EIP712 {
         }
 
         AuditEntry[] memory results = new AuditEntry[](count);
-        uint256 idx;
-        for (uint256 i = 0; i < ids.length; i++) {
+        uint idx;
+        for (uint i = 0; i < ids.length; i++) {
             AuditEntry storage e = _entries[ids[i]];
             if (e.timestamp >= fromTimestamp && e.timestamp <= toTimestamp) {
                 results[idx] = e;
@@ -118,12 +111,14 @@ contract BastionAudit is IBastionAudit, EIP712 {
     }
 
     /// @inheritdoc IBastionAudit
-    function getEntryCount() external view override returns (uint256) {
+    function getEntryCount() external view override returns (uint) {
         return _entryCount;
     }
 
     /// @notice Get the total number of entries for a specific agent.
-    function getAgentEntryCount(address agent) external view returns (uint256) {
+    function getAgentEntryCount(
+        address agent
+    ) external view returns (uint) {
         return _agentEntries[agent].length;
     }
 

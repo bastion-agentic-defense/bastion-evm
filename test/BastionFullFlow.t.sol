@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Test, console} from "forge-std/Test.sol";
-import {BastionPolicy} from "../src/BastionPolicy.sol";
-import {BastionAudit} from "../src/BastionAudit.sol";
-import {BastionFirewall} from "../src/BastionFirewall.sol";
-import {BastionRegistry} from "../src/BastionRegistry.sol";
-import {IBastionPolicy} from "../src/interfaces/IBastionPolicy.sol";
-import {IBastionAudit} from "../src/interfaces/IBastionAudit.sol";
-import {IBastionFirewall, PackedUserOperation} from "../src/interfaces/IBastionFirewall.sol";
-import {IBastionRegistry} from "../src/interfaces/IBastionRegistry.sol";
+import { Test } from "forge-std/Test.sol";
+import { BastionPolicy } from "../src/BastionPolicy.sol";
+import { BastionAudit } from "../src/BastionAudit.sol";
+import { BastionFirewall } from "../src/BastionFirewall.sol";
+import { BastionRegistry } from "../src/BastionRegistry.sol";
+import { IBastionPolicy } from "../src/interfaces/IBastionPolicy.sol";
+import { IBastionAudit } from "../src/interfaces/IBastionAudit.sol";
+import { IBastionFirewall } from "../src/interfaces/IBastionFirewall.sol";
+import { IBastionRegistry } from "../src/interfaces/IBastionRegistry.sol";
 
 contract BastionFullFlowTest is Test {
     BastionRegistry public registry;
@@ -31,9 +31,7 @@ contract BastionFullFlowTest is Test {
         registry = new BastionRegistry(owner);
 
         firewall = new BastionFirewall(
-            IBastionPolicy(address(policy)),
-            IBastionAudit(address(audit)),
-            owner
+            IBastionPolicy(address(policy)), IBastionAudit(address(audit)), owner
         );
 
         // Register target
@@ -89,8 +87,10 @@ contract BastionFullFlowTest is Test {
     }
 
     function test_FullFlow_PolicyAllowsAuthorizedTransaction() public {
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(agent, target, 1 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(agent, target, 1 ether, callData);
         assertTrue(allowed);
         assertEq(reason.length, 0);
     }
@@ -103,15 +103,19 @@ contract BastionFullFlowTest is Test {
     }
 
     function test_FullFlow_PolicyBlocksUnauthorizedTarget() public {
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(agent, blockedTarget, 1 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(agent, blockedTarget, 1 ether, callData);
         assertFalse(allowed);
         assertEq(reason, abi.encodePacked("TargetNotAllowed"));
     }
 
     function test_FullFlow_PolicyBlocksExceededValue() public {
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(agent, target, 20 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(agent, target, 20 ether, callData);
         assertFalse(allowed);
         assertEq(reason, abi.encodePacked("ValueExceedsLimit"));
     }
@@ -133,8 +137,10 @@ contract BastionFullFlowTest is Test {
         vm.prank(owner);
         policy.setPolicy(agent, inactivePolicy);
 
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(agent, target, 1 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(agent, target, 1 ether, callData);
         assertFalse(allowed);
         assertEq(reason, abi.encodePacked("PolicyInactive"));
     }
@@ -161,7 +167,8 @@ contract BastionFullFlowTest is Test {
         vm.prank(owner);
         policy.setPolicy(agent, limitedPolicy);
 
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
 
         // First tx: allowed (we're only checking, not counting in this call)
         (bool allowed1,) = policy.checkTransaction(agent, target, 1 ether, callData);
@@ -174,8 +181,10 @@ contract BastionFullFlowTest is Test {
     }
 
     function test_FullFlow_PolicyBlocksUnsetAgent() public {
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(stranger, target, 1 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(stranger, target, 1 ether, callData);
         assertFalse(allowed);
         assertEq(reason, abi.encodePacked("PolicyNotSet"));
     }
@@ -204,8 +213,10 @@ contract BastionFullFlowTest is Test {
         // Warp past cooldown
         vm.warp(block.timestamp + 3601);
 
-        bytes memory callData = abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
-        (bool allowed, bytes memory reason) = policy.checkTransaction(agent, target, 1 ether, callData);
+        bytes memory callData =
+            abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 100);
+        (bool allowed, bytes memory reason) =
+            policy.checkTransaction(agent, target, 1 ether, callData);
         assertTrue(allowed);
         assertEq(reason.length, 0);
     }

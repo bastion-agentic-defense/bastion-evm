@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Script, console} from "forge-std/Script.sol";
-import {BastionPolicy} from "../src/BastionPolicy.sol";
-import {BastionAudit} from "../src/BastionAudit.sol";
-import {BastionFirewall} from "../src/BastionFirewall.sol";
-import {BastionRegistry} from "../src/BastionRegistry.sol";
-import {IBastionPolicy} from "../src/interfaces/IBastionPolicy.sol";
-import {IBastionAudit} from "../src/interfaces/IBastionAudit.sol";
+import { Script, console } from "forge-std/Script.sol";
+import { BastionPolicy } from "../src/BastionPolicy.sol";
+import { BastionAudit } from "../src/BastionAudit.sol";
+import { BastionFirewall } from "../src/BastionFirewall.sol";
+import { BastionRegistry } from "../src/BastionRegistry.sol";
+import { IBastionPolicy } from "../src/interfaces/IBastionPolicy.sol";
+import { IBastionAudit } from "../src/interfaces/IBastionAudit.sol";
 
 /// @title DeployBastion
 /// @notice Deploy the full Bastion protocol to any EVM chain.
@@ -16,7 +16,7 @@ import {IBastionAudit} from "../src/interfaces/IBastionAudit.sol";
 ///   forge script script/DeployBastion.s.sol --rpc-url polygon --broadcast --verify
 contract DeployBastion is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
 
         console.log("Deployer:", deployer);
@@ -38,9 +38,7 @@ contract DeployBastion is Script {
 
         // 4. Deploy Firewall
         BastionFirewall firewall = new BastionFirewall(
-            IBastionPolicy(address(policy)),
-            IBastionAudit(address(audit)),
-            deployer
+            IBastionPolicy(address(policy)), IBastionAudit(address(audit)), deployer
         );
         console.log("BastionFirewall deployed at:", address(firewall));
 

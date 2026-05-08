@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IBastionRegistry} from "./interfaces/IBastionRegistry.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IBastionRegistry } from "./interfaces/IBastionRegistry.sol";
 
 /// @title BastionRegistry
 /// @notice On-chain directory of AI agents, target contracts, and validators.
@@ -19,12 +19,16 @@ contract BastionRegistry is IBastionRegistry, Ownable {
         _;
     }
 
-    constructor(address _owner) Ownable(_owner) {
+    constructor(
+        address _owner
+    ) Ownable(_owner) {
         admin = _owner;
     }
 
     /// @notice Set the admin address.
-    function setAdmin(address _admin) external onlyOwner {
+    function setAdmin(
+        address _admin
+    ) external onlyOwner {
         admin = _admin;
     }
 
@@ -55,13 +59,17 @@ contract BastionRegistry is IBastionRegistry, Ownable {
     }
 
     /// @notice Deactivate an agent (owner only).
-    function deactivateAgent(address agent) external {
+    function deactivateAgent(
+        address agent
+    ) external {
         if (_agents[agent].owner != msg.sender) revert NotAgentOwner(agent, msg.sender);
         _agents[agent].isActive = false;
     }
 
     /// @notice Reactivate an agent (owner only).
-    function reactivateAgent(address agent) external {
+    function reactivateAgent(
+        address agent
+    ) external {
         if (_agents[agent].owner != msg.sender) revert NotAgentOwner(agent, msg.sender);
         _agents[agent].isActive = true;
     }
@@ -90,7 +98,9 @@ contract BastionRegistry is IBastionRegistry, Ownable {
     }
 
     /// @inheritdoc IBastionRegistry
-    function verifyTarget(address target) external override onlyAdmin {
+    function verifyTarget(
+        address target
+    ) external override onlyAdmin {
         if (_targets[target].target == address(0)) revert TargetNotRegistered(target);
         _targets[target].isVerified = true;
         _targets[target].verifier = msg.sender;
@@ -103,32 +113,42 @@ contract BastionRegistry is IBastionRegistry, Ownable {
     // ──────────────────────────────────────────────────────────────
 
     /// @inheritdoc IBastionRegistry
-    function isAgentActive(address agent) external view override returns (bool) {
+    function isAgentActive(
+        address agent
+    ) external view override returns (bool) {
         return _agents[agent].isActive;
     }
 
     /// @inheritdoc IBastionRegistry
-    function isTargetVerified(address target) external view override returns (bool) {
+    function isTargetVerified(
+        address target
+    ) external view override returns (bool) {
         return _targets[target].isVerified;
     }
 
     /// @inheritdoc IBastionRegistry
-    function getAgent(address agent) external view override returns (AgentInfo memory) {
+    function getAgent(
+        address agent
+    ) external view override returns (AgentInfo memory) {
         if (_agents[agent].agent == address(0)) revert AgentNotRegistered(agent);
         return _agents[agent];
     }
 
     /// @inheritdoc IBastionRegistry
-    function getTarget(address target) external view override returns (TargetInfo memory) {
+    function getTarget(
+        address target
+    ) external view override returns (TargetInfo memory) {
         if (_targets[target].target == address(0)) revert TargetNotRegistered(target);
         return _targets[target];
     }
 
     /// @notice Get all agents owned by an address.
-    function getAgentsByOwner(address owner) external view returns (AgentInfo[] memory) {
+    function getAgentsByOwner(
+        address owner
+    ) external view returns (AgentInfo[] memory) {
         address[] storage agentList = _ownerAgents[owner];
         AgentInfo[] memory results = new AgentInfo[](agentList.length);
-        for (uint256 i = 0; i < agentList.length; i++) {
+        for (uint i = 0; i < agentList.length; i++) {
             results[i] = _agents[agentList[i]];
         }
         return results;

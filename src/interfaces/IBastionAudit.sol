@@ -11,12 +11,12 @@ interface IBastionAudit {
         address agent;
         address target;
         bytes4 selector;
-        uint256 value;
-        uint256 gasUsed;
+        uint value;
+        uint gasUsed;
         bool allowed;
         bytes reason;
-        uint256 timestamp;
-        uint256 blockNumber;
+        uint timestamp;
+        uint blockNumber;
         bytes signature;
     }
 
@@ -25,25 +25,27 @@ interface IBastionAudit {
         address agent,
         address target,
         bytes4 selector,
-        uint256 value,
-        uint256 gasUsed,
+        uint value,
+        uint gasUsed,
         bool allowed,
         bytes calldata reason,
         bytes calldata signature
     ) external returns (bytes32 entryId);
 
     /// @notice Get an audit entry by ID.
-    function getEntry(bytes32 entryId) external view returns (AuditEntry memory);
+    function getEntry(
+        bytes32 entryId
+    ) external view returns (AuditEntry memory);
 
     /// @notice Get all audit entries for an agent within a time range.
     function getEntriesByAgent(
         address agent,
-        uint256 fromTimestamp,
-        uint256 toTimestamp
+        uint fromTimestamp,
+        uint toTimestamp
     ) external view returns (AuditEntry[] memory);
 
     /// @notice Get the total number of audit entries recorded.
-    function getEntryCount() external view returns (uint256);
+    function getEntryCount() external view returns (uint);
 
     /// @notice EIP-712 type hash for audit entries.
     function AUDIT_ENTRY_TYPEHASH() external view returns (bytes32);
@@ -54,6 +56,6 @@ interface IBastionAudit {
         address indexed target,
         bytes4 selector,
         bool allowed,
-        uint256 timestamp
+        uint timestamp
     );
 }

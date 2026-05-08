@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {BastionPolicy} from "../src/BastionPolicy.sol";
-import {IBastionPolicy} from "../src/interfaces/IBastionPolicy.sol";
-import {Test} from "forge-std/Test.sol";
+import { BastionPolicy } from "../src/BastionPolicy.sol";
+import { IBastionPolicy } from "../src/interfaces/IBastionPolicy.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract BastionPolicyGasTest is Test {
     BastionPolicy public policy;
@@ -15,7 +15,7 @@ contract BastionPolicyGasTest is Test {
         policy = new BastionPolicy(owner);
 
         // Create 5 agents for gas benchmarking
-        for (uint256 i = 0; i < 5; i++) {
+        for (uint i = 0; i < 5; i++) {
             address agent = makeAddr(string(abi.encodePacked("agent", vm.toString(i))));
             agents.push(agent);
 
